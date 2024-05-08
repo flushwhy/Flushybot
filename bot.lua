@@ -2,16 +2,14 @@ local discordia = require('discordia')
 local client = discordia.Client()
 local Dotenv = require('dotenv')
 
-discordia.extensions()
+-- commands
+local baseCommands = require("commands.baseCommands")
 
 Dotenv.load_env(".env")
 
 discordia.extensions() -- load all helpful extensions
 
 local prefix = '!'
-
-local baseCommands = require("commands.baseCommands")
-
 local commands = {}
 
 for key, value in pairs(baseCommands) do
