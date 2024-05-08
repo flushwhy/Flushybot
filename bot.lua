@@ -9,12 +9,20 @@ Dotenv.load_env(".env")
 
 discordia.extensions() -- load all helpful extensions
 
-local prefix = '!'
-local commands = {}
 
-for key, value in pairs(baseCommands) do
-    commands[prefix .. key] = value
+function Commands(prefix, ...)
+    local commands = {}
+    for _, cmds in ipairs({...}) do
+        for key, value in pairs(cmds) do
+            commands[prefix .. key] = value
+        end
+    end
+    return commands
 end
+
+local prefix = "!"
+local commands = Commands(prefix, baseCommands)
+
 
 client:on("messageCreate", function(message)
     if message.author.bot then
