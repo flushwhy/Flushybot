@@ -19,15 +19,12 @@ for key, value in pairs(baseCommands) do
 end
 
 client:on("messageCreate", function(message)
-    print("Received message: " .. message.content)
     if message.author.bot then
         return
     end
 
     for command, value in pairs(commands) do
-        print("Checking for command: " .. command)
         if message.content == command then
-            print("Executing command: " .. command)
             value.exec(message)
         end
     end

@@ -3,8 +3,13 @@
         ["hello"] = {
             description = "Answers with world.",
             exec = function(message)
-                print("Executing hello command.")
                 message.channel:send("world!")
+            end
+        },
+        ["ping"] = {
+            description = "Pings the bot.",
+            exec = function(message)
+                message.channel:send("Pong!")
             end
         }
     }
