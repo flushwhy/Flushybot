@@ -8,4 +8,3 @@
     author = { name = "Flushwhy", email = "roflush@pm.me" }
     homepage = "https://github.com/flushbot"
   ]]
-  
