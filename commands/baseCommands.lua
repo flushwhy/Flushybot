@@ -1,4 +1,7 @@
 -- baseCommands.lua
+
+local timeout = require("util.timeout")
+
 math.randomseed(os.time())
 
 local baseCommands = {
@@ -27,21 +30,20 @@ local baseCommands = {
         description = "You pick a number between 1 and 10 and I will kick you. If you pick the same number as me, I will kick you.",
         exec = function(message)
             local numberToGuess = math.random(1, 10)
+            local orgMessageauthor = message.author
 
             message.channel:send(
                 "Pick a number between 1 and 10, and I'll kick you. If you pick the same number as me, I will kick you.")
             --TODO: Figure out why Client here doesn't work.
-                client:on('messageCreate', function(msg)
-                if msg.author == message.author then
-                    local guess = tonumber(msg.content)
-                    if guess == numberToGuess then
-                        msg.channel:send("You got it! I kicked you.")
-                        msg.member:kick()
-                    else
-                        msg.channel:send("Nope, it was " .. numberToGuess)
-                    end
+            timeout(100)
+            if message.guild and message.author == orgMessageauthor then
+                if tonumber(message.content) == numberToGuess then
+                    message.channel:send("You got it! I was thinking " .. numberToGuess .. ". I'll kick you!")
+                    client:kick(orgMessageauthor)
+                else
+                    message.channel:send("Nope. I was thinking " .. numberToGuess .. ".")
                 end
-            end)
+            end
         end
     },
     ["msg"] = {
