@@ -66,11 +66,12 @@ baseCommands.muteoulette = {
         end
 
         local minutes = (roll - 1) * 5
-        local ok, err = pcall(function()
-            message.member:setTimeout(minutes * 60 * 1000)
+        local ok, result, timeoutErr = pcall(function()
+            return message.member:setTimeout(minutes * 60 * 1000)
         end)
 
-        if not ok then
+        if not ok or result == false then
+            local err = ok and timeoutErr or result
             print("muteoulette failed: " .. tostring(err))
             message.channel:send("I couldn't apply the timeout. Check that I have **Moderate Members** permission and my role is high enough.")
             return
@@ -128,8 +129,14 @@ baseCommands.donate = {
             return
         end
 
-        message.author:send(string.format("Your $%d early-unmute checkout link: %s\nYour timeout is only removed after Stripe confirms payment.", amount, result.url))
-        message.channel:send(message.author.mentionString .. ", I sent your secure checkout link in a DM. Check your privacy settings if you don't receive it.")
+        local sent = pcall(function()
+            message.author:send(string.format("Your $%d early-unmute checkout link: %s\nYour timeout is only removed after Stripe confirms payment.", amount, result.url))
+        end)
+        if not sent then
+            message.channel:send("I couldn't DM you the checkout link. Enable DMs from server members and try again.")
+            return
+        end
+        message.channel:send(message.author.mentionString .. ", I sent your secure checkout link in a DM.")
     end
 }
 
