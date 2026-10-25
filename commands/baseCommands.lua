@@ -12,12 +12,12 @@ local function stripeServicePost(path, payload)
     local response, body = http.request("POST", baseUrl .. path, {
         { "Content-Type", "application/json" },
         { "Authorization", "Bearer " .. serviceToken }
-    }, json.encode(payload))
+    }, json.stringify(payload))
 
     if not response or response.code < 200 or response.code >= 300 then
         error("Stripe service returned HTTP " .. tostring(response and response.code or "no response"))
     end
-    return json.decode(body)
+    return json.parse(body)
 end
 
 baseCommands.hello = {
