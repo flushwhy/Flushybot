@@ -1,45 +1,34 @@
-discordia = require('discordia')
-client = discordia.Client()
-local Dotenv = require('dotenv')
-
--- commands
-local baseCommands = require("commands.baseCommands")
+local discordia = require("discordia")
+local Dotenv = require("dotenv")
 
 Dotenv.load_env(".env")
+discordia.extensions()
 
-discordia.extensions() -- load all helpful extensions
+local token = Dotenv.get_value("TOKEN")
+assert(token and token ~= "", "Missing TOKEN in .env")
 
-
-function Commands(prefix, ...)
-    local commands = {}
-    for _, cmds in ipairs({...}) do
-        for key, value in pairs(cmds) do
-            commands[prefix .. key] = value
-        end
-    end
-    return commands
-end
-
+local client = discordia.Client()
 local prefix = "!"
-local commands = Commands(prefix, baseCommands)
+local commands = require("commands.baseCommands")
 
---[[
-    This is basiscally a listen to ALL messages, and react to the commands.
-    That are passed by the Commands() function above this. If everything goes well.
-    It will excute the "exec" function of the command. That can be found in commands\<name>Commands.lua.
-]]
+client:on("ready", function()
+    print("Flushybot is ready.")
+end)
+
 client:on("messageCreate", function(message)
-
-    print ("Message: " .. message.content)
-    if message.author.bot then
+    if message.author.bot or not message.content or message.content:sub(1, #prefix) ~= prefix then
         return
     end
 
-    for command, value in pairs(commands) do
-        if message.content == command then
-            value.exec(message)
-        end
+    local name = message.content:sub(#prefix + 1):match("^(%S+)")
+    local command = name and commands[name:lower()]
+    if not command then return end
+
+    local ok, err = pcall(command.exec, message)
+    if not ok then
+        print(string.format("Command %s failed: %s", name, tostring(err)))
+        message.channel:send("That command hit an error. Check the bot logs.")
     end
 end)
 
-client:run("Bot " .. Dotenv.get_value("TOKEN"))
+client:run("Bot " .. token)
