@@ -21,7 +21,7 @@ baseCommands.help = {
         for name, command in pairs(baseCommands) do
             lines[#lines + 1] = string.format("`!%s` — %s", name, command.description)
         end
-        table.sort(lines, function(a, b) return a < b end)
+        table.sort(lines)
         message.channel:send(table.concat(lines, "\n"))
     end
 }
@@ -47,7 +47,7 @@ baseCommands.muteoulette = {
 
         if not ok then
             print("muteoulette failed: " .. tostring(err))
-            message.channel:send("I couldn't apply the timeout. Check that I have the Moderate Members permission and that my role is high enough.")
+            message.channel:send("I couldn't apply the timeout. Check that I have **Moderate Members** permission and my role is high enough.")
             return
         end
 
@@ -60,7 +60,7 @@ baseCommands.msg = {
     exec = function(message)
         local text = message.content:match("^!msg%s+(.+)$")
         if not text then
-            message.channel:send("Usage: `!msg <text>`")
+            message.channel:send("Usage: !msg <text>")
             return
         end
         message.channel:send(text)
