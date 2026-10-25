@@ -8,7 +8,7 @@ baseCommands.hello = {
 }
 
 baseCommands.ping = {
-    description = "Check whether Flushybot is online.",
+    description = "Check whether the bot is online.",
     exec = function(message)
         message.channel:send("Pong!")
     end
@@ -17,11 +17,16 @@ baseCommands.ping = {
 baseCommands.help = {
     description = "List available commands.",
     exec = function(message)
-        local lines = { "**Flushybot commands**" }
-        for name, command in pairs(baseCommands) do
-            lines[#lines + 1] = string.format("`!%s` — %s", name, command.description)
+        local names = {}
+        for name in pairs(baseCommands) do
+            names[#names + 1] = name
         end
-        table.sort(lines)
+        table.sort(names)
+
+        local lines = { "**Flushybot commands**" }
+        for _, name in ipairs(names) do
+            lines[#lines + 1] = string.format("`!%s` — %s", name, baseCommands[name].description)
+        end
         message.channel:send(table.concat(lines, "\n"))
     end
 }
