@@ -101,6 +101,7 @@ app.post("/internal/checkout", authorized, async (req, res) => {
 
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
+      payment_method_types: ["card"],
       client_reference_id: userId,
       line_items: [{
         price_data: {
