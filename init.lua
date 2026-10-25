@@ -4,8 +4,7 @@
     dependencies = {
       "4keef/Dotenv@0.0.6",
       "SinisterRectus/Discordia",
-      "creationix/coro-http",
-      "creationix/json"
+      "luvit/coro-http@3.2.4"
     }
     description = "A discordbot in lua"
     tags = { "lua", "lit", "luvit" }
