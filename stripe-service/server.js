@@ -47,7 +47,15 @@ app.post("/stripe/webhook", express.raw({ type: "application/json" }), async (re
     if (event.type === "checkout.session.completed") {
       const session = event.data.object;
       if (session.mode === "payment" && session.payment_status === "paid") {
-        await redeem(session);
+        const redeemed = await redeem(session);
+        if (!redeemed) {
+          if (!session.payment_intent) throw new Error("Paid Checkout Session has no PaymentIntent to refund.");
+          await stripe.refunds.create(
+            { payment_intent: session.payment_intent },
+            { idempotencyKey: `refund-${session.id}` }
+          );
+          console.log(`Refunded Checkout ${session.id}: the original Muteoulette timeout was no longer eligible.`);
+        }
       }
     }
 
@@ -121,23 +129,24 @@ async function redeem(session) {
 
   const key = timeoutKey(guildId, userId);
   const active = state.timeouts[key];
-  if (!active || active.timeoutUntil !== timeoutUntil || Date.parse(active.timeoutUntil) <= Date.now()) return;
+  if (!active || active.timeoutUntil !== timeoutUntil || Date.parse(active.timeoutUntil) <= Date.now()) return false;
 
   const base = `https://discord.com/api/v10/guilds/${guildId}/members/${userId}`;
   const headers = { Authorization: `Bot ${process.env.DISCORD_BOT_TOKEN}` };
   const memberResponse = await fetch(base, { headers });
+  if (memberResponse.status === 404) return false;
   if (!memberResponse.ok) throw new Error(`Discord member lookup failed: ${memberResponse.status}`);
   const member = await memberResponse.json();
   if (!member.communication_disabled_until) {
     delete state.timeouts[key];
     saveState();
-    return;
+    return false;
   }
 
   const actualUntil = Date.parse(member.communication_disabled_until);
   const expectedUntil = Date.parse(active.timeoutUntil);
   // Do not remove a timeout that appears to have been changed by a moderator.
-  if (!Number.isFinite(actualUntil) || Math.abs(actualUntil - expectedUntil) > 90_000) return;
+  if (!Number.isFinite(actualUntil) || Math.abs(actualUntil - expectedUntil) > 90_000) return false;
 
   const response = await fetch(base, {
     method: "PATCH",
@@ -149,6 +158,7 @@ async function redeem(session) {
   delete state.timeouts[key];
   saveState();
   console.log(`Early unmute granted for Discord user ${userId} via Checkout ${session.id}`);
+  return true;
 }
 
 app.listen(port, () => console.log(`Stripe service listening on port ${port}`));
