@@ -1,7 +1,12 @@
   --[[lit-meta
     name = "flushbot"
     version = "0.0.1"
-    dependencies = {"4keef/Dotenv@0.0.6", "SinisterRectus/Discordia"}
+    dependencies = {
+      "4keef/Dotenv@0.0.6",
+      "SinisterRectus/Discordia",
+      "creationix/coro-http",
+      "creationix/json"
+    }
     description = "A discordbot in lua"
     tags = { "lua", "lit", "luvit" }
     license = "GPL"
