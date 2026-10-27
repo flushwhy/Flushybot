@@ -1,0 +1,4 @@
+.env
+node_modules/
+stripe-state.json
+stripe-state.json.tmp

@@ -24,11 +24,13 @@ client:on("messageCreate", function(message)
     local command = name and commands[name:lower()]
     if not command then return end
 
-    local ok, err = pcall(command.exec, message)
-    if not ok then
-        print(string.format("Command %s failed: %s", name, tostring(err)))
-        message.channel:send("That command hit an error. Check the bot logs.")
-    end
+    coroutine.wrap(function()
+        local ok, err = pcall(command.exec, message)
+        if not ok then
+            print(string.format("Command %s failed: %s", name, tostring(err)))
+            message.channel:send("That command hit an error. Check the bot logs.")
+        end
+    end)()
 end)
 
 client:run("Bot " .. token)
